@@ -12,12 +12,43 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 
     @IBOutlet weak var collection: UICollectionView!
     
+    var pokemons = [Pokemon]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         
         collection.dataSource = self
         collection.delegate = self
+        
+        parsePokemonCSV()
+    }
+    
+    func parsePokemonCSV() {
+        
+        guard let path = Bundle.main.path(forResource: "pokemon", ofType: "csv") else {
+            print("Error in pokemon csv path")
+            return
+        }
+        
+        do {
+            let csv = try CSV(contentsOfURL: path)
+            let rows = csv.rows
+            
+            for row in rows {
+                guard let name = row["identifier"], let idString = row["id"], let pokeId = Int(idString) else {
+                    print("Error fetching name and id")
+                    return
+                }
+                
+                let newPokemon = Pokemon(name: name, pokedexId: pokeId)
+                pokemons.append(newPokemon)
+            }
+            
+            
+        } catch let error {
+            print(error.localizedDescription)
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -27,9 +58,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             return UICollectionViewCell()
         }
         
-        let pokemon = Pokemon(name: "Pokemon", pokedexId: indexPath.row)
-        cell.configureCell(pokemon: pokemon)
+        let pokemon = pokemons[indexPath.row]
         
+        cell.configureCell(pokemon)
         
         return cell
     }
@@ -40,7 +71,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        return 30
+        return pokemons.count
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
