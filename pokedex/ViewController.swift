@@ -160,6 +160,7 @@ extension ViewController: UISearchBarDelegate {
         if searchBar.text == nil || searchBar.text == "" {
             inSearchMode = false
             view.endEditing(true)
+            collection.reloadData()
         } else {
             inSearchMode = true
             if  let lower = searchBar.text?.lowercased() {
